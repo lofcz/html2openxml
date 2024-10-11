@@ -8,7 +8,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>HtmlToOpenXml</AssemblyName>
     <RootNamespace>HtmlToOpenXml</RootNamespace>
-    <PackageId>HtmlToOpenXml.dll</PackageId>
+    <PackageId>Lofcz.Forks.HtmlToOpenXml.dll</PackageId>
     <Version>3.2.0</Version>
     <PackageIcon>icon.png</PackageIcon>
     <Copyright>Copyright 2009-$([System.DateTime]::Now.Year) Olivier Nizet</Copyright>
@@ -19,7 +19,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/onizet/html2openxml</PackageProjectUrl>
     <RepositoryUrl>https://github.com/onizet/html2openxml</RepositoryUrl>
-    <Description>A library to convert simple or advanced html to plain OpenXml document</Description>
+    <Description>This is a staging fork, please use upstream work here: https://github.com/onizet/html2openxml</Description>
     <Authors>Olivier Nizet</Authors>
     <RepositoryType>GIT</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
