@@ -1,4 +1,4 @@
-/* Copyright (C) Olivier Nizet https://github.com/onizet/html2openxml - All Rights Reserved
+﻿/* Copyright (C) Olivier Nizet https://github.com/onizet/html2openxml - All Rights Reserved
  * 
  * This source is subject to the Microsoft Permissive License.
  * Please see the License.txt file for more information.
@@ -10,6 +10,7 @@
  * PARTICULAR PURPOSE.
  */
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AngleSharp.Html.Dom;
 using DocumentFormat.OpenXml;
@@ -30,9 +31,6 @@ sealed class TableCellExpression(IHtmlTableCellElement node) : TableElementExpre
     {
         var childElements = base.Interpret (context);
 
-        if (!childElements.Any()) // Word requires that the cell is not empty
-            childElements = [new Paragraph()];
-
         var cell = new TableCell (cellProperties);
 
         if (cellNode.ColumnSpan > 1)
@@ -43,6 +41,13 @@ sealed class TableCellExpression(IHtmlTableCellElement node) : TableElementExpre
         if (IsValidRowSpan(cellNode.RowSpan))
         {
             cellProperties.VerticalMerge = new() { Val = MergedCellValues.Restart };
+        }
+
+        // Word requires at least one paragraph in a cell
+        // OpenXmlValidator does not catch this error
+        if (!childElements.Any(c => c is Paragraph))
+        {
+            childElements = childElements.Append(new Paragraph());
         }
 
         cell.Append(childElements);
@@ -58,6 +63,27 @@ sealed class TableCellExpression(IHtmlTableCellElement node) : TableElementExpre
     protected override void ComposeStyles(ParsingContext context)
     {
         base.ComposeStyles(context);
+
+        Unit width = styleAttributes!.GetUnit("width");
+        if (!width.IsValid)
+        {
+            var widthValue = cellNode.GetAttribute("width");
+            if (!string.IsNullOrEmpty(widthValue))
+            {
+                width = Unit.Parse(widthValue);
+            }
+        }
+
+        if (width.IsValid)
+        {
+            cellProperties.TableCellWidth = new TableCellWidth
+            {
+                Type = width.Type == UnitMetric.Percent ? TableWidthUnitValues.Pct : TableWidthUnitValues.Dxa,
+                Width = width.Type == UnitMetric.Percent
+                    ? ((int) (width.Value * 50)).ToString(CultureInfo.InvariantCulture)
+                    : width.ValueInDxa.ToString(CultureInfo.InvariantCulture)
+            };
+        }
 
         // Manage vertical text (only for table cell)
         string? direction = styleAttributes!["writing-mode"];
